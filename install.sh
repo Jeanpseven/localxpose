@@ -23,11 +23,11 @@ download_and_extract() {
     url=$1
     directory=$2
     tmp_dir=$(mktemp -d)
-    curl -sSL "$url" -o "$tmp_dir/loclx.zip"
-    unzip -qq "$tmp_dir/loclx.zip" -d "$tmp_dir"
-    sudo mkdir -p "$directory"
-    sudo mv "$tmp_dir"/* "$directory"
-    sudo chmod +x "$directory/loclx"
+    curl -sSL "$url" -o "$tmp_dir/loclx.zip" &&
+    unzip -qq "$tmp_dir/loclx.zip" -d "$tmp_dir" &&
+    sudo mkdir -p "$directory" &&
+    sudo mv "$tmp_dir"/* "$directory" &&
+    sudo chmod +x "$directory/loclx" &&
     rm -rf "$tmp_dir"
 }
 
@@ -50,18 +50,30 @@ localxpose_auth() {
     fi
 }
 
+# Function to start LocalXpose with a public port
+start_localxpose() {
+    read -p "Enter local port to expose: " local_port
+    read -p "Enter public port to use: " public_port
+    /usr/share/loclx/loclx tcp "$local_port" -p "$public_port" -v &
+    public_url="https://$USER.localxpose.me:$public_port"
+    echo "Access your hosted service at: $public_url"
+    echo "Monitor your hosted service at: https://localxpose.io/overview"
+}
+
 # Function to display menu
 menu() {
     clear
     echo "=== LocalXpose Menu ==="
     echo "1. Install LocalXpose"
     echo "2. Configure LocalXpose authentication"
-    echo "3. Exit"
+    echo "3. Start LocalXpose with public port"
+    echo "4. Exit"
     read -p "Enter your choice: " choice
     case $choice in
         1) install_localxpose ;;
         2) localxpose_auth ;;
-        3) exit ;;
+        3) start_localxpose ;;
+        4) exit ;;
         *) echo "Invalid choice. Please enter a valid option." ;;
     esac
 }
