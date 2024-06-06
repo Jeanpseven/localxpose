@@ -1,5 +1,12 @@
 #!/bin/bash
 
+# Function to download a file
+download() {
+    url=$1
+    filename=$2
+    curl -sSL "$url" -o "$filename"
+}
+
 # Function to download LocalXpose
 install_localxpose() {
     if [[ -e "./loclx" ]]; then
