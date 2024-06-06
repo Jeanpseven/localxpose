@@ -55,9 +55,6 @@ start_localxpose() {
     read -p "Enter local port to expose: " local_port
     read -p "Enter public port to use: " public_port
     /usr/share/loclx/loclx tcp "$local_port" -p "$public_port" -v &
-    public_url="https://$USER.localxpose.me:$public_port"
-    echo "Access your hosted service at: $public_url"
-    echo "Monitor your hosted service at: https://localxpose.io/overview"
 }
 
 # Function to display menu
