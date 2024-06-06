@@ -1,36 +1,41 @@
 #!/bin/bash
 
-# Function to download a file
-download() {
-    url=$1
-    filename=$2
-    curl -sSL "$url" -o "$filename"
-}
-
-# Function to download LocalXpose
+# Function to download and extract LocalXpose
 install_localxpose() {
-    if [[ -e "./loclx" ]]; then
+    if [[ -e "/usr/share/loclx/loclx" ]]; then
         printf "\n${RS} ${CR}[${CW}-${CR}]${CG} Localxpose already installed.${RS}"
     else
         printf "\n${RS} ${CR}[${CW}-${CR}]${CC} Installing Localxpose...${RS}"
         if [[ ("$architecture" == *'arm'*) || ("$architecture" == *'Android'*) ]]; then
-            download 'https://api.localxpose.io/api/v2/downloads/loclx-linux-arm.zip' 'loclx'
+            download_and_extract 'https://api.localxpose.io/api/v2/downloads/loclx-linux-arm.zip' '/usr/share/loclx'
         elif [[ "$architecture" == *'aarch64'* ]]; then
-            download 'https://api.localxpose.io/api/v2/downloads/loclx-linux-arm64.zip' 'loclx'
+            download_and_extract 'https://api.localxpose.io/api/v2/downloads/loclx-linux-arm64.zip' '/usr/share/loclx'
         elif [[ "$architecture" == *'x86_64'* ]]; then
-            download 'https://api.localxpose.io/api/v2/downloads/loclx-linux-amd64.zip' 'loclx'
+            download_and_extract 'https://api.localxpose.io/api/v2/downloads/loclx-linux-amd64.zip' '/usr/share/loclx'
         else
-            download 'https://api.localxpose.io/api/v2/downloads/loclx-linux-386.zip' 'loclx'
+            download_and_extract 'https://api.localxpose.io/api/v2/downloads/loclx-linux-386.zip' '/usr/share/loclx'
         fi
     fi
 }
 
+# Function to download and extract archive
+download_and_extract() {
+    url=$1
+    directory=$2
+    tmp_dir=$(mktemp -d)
+    curl -sSL "$url" -o "$tmp_dir/loclx.zip"
+    unzip -qq "$tmp_dir/loclx.zip" -d "$tmp_dir"
+    sudo mkdir -p "$directory"
+    sudo mv "$tmp_dir"/* "$directory"
+    sudo chmod +x "$directory/loclx"
+    rm -rf "$tmp_dir"
+}
+
 # Function for LocalXpose authentication
 localxpose_auth() {
-    ./loclx -help > /dev/null 2>&1 &
-    { logo; sleep 1; }
+    /usr/share/loclx/loclx -help > /dev/null 2>&1 &
     [ -d ".localxpose" ] && auth_f=".localxpose/.access" || auth_f="$HOME/.localxpose/.access"
-    [ -d "/data/data/com.termux/files/home" ] && status=$(termux-chroot ./loclx account status) || status=$(./loclx account status)
+    [ -d "/data/data/com.termux/files/home" ] && status=$(termux-chroot /usr/share/loclx/loclx account status) || status=$(/usr/share/loclx/loclx account status)
 
     if [[ $status == *"Error"* ]]; then
         echo -e "\n${CR} [${CW}!${CR}]${CG} Create an account on ${CY}localxpose.io${CG} & copy the token\n"
